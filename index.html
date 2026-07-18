@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Vocabulary Online Assessment</title>
+<style>
+:root{
+  --navy:#123b67;--blue:#2474c6;--sky:#eaf5ff;--gold:#ffb703;
+  --orange:#fb5607;--green:#2f9e44;--red:#d6333f;--ink:#17324d;
+  --white:#fff;--soft:#f5f9fd;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,"Noto Sans Thai",sans-serif;color:var(--ink);
+  min-height:100vh;background:
+  radial-gradient(circle at 10% 10%,rgba(255,183,3,.18),transparent 22%),
+  radial-gradient(circle at 90% 15%,rgba(36,116,198,.14),transparent 23%),
+  linear-gradient(135deg,#eef8ff,#fffaf0);
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1120px;margin:auto;padding:18px}
+.header{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  color:white;background:linear-gradient(135deg,var(--navy),var(--blue));
+  padding:18px 22px;border-radius:22px;box-shadow:0 14px 30px rgba(18,59,103,.22)
+}
+.header h1{margin:0;font-size:clamp(24px,4vw,40px)}
+.header p{margin:5px 0 0;opacity:.9}
+.teacher-mini{display:flex;align-items:center;gap:10px;font-weight:700}
+.teacher-mini img{
+  width:66px;height:66px;object-fit:cover;object-position:top;border-radius:50%;
+  border:3px solid white;background:white
+}
+.screen{display:none}.screen.active{display:block}
+.panel{
+  margin-top:18px;background:rgba(255,255,255,.96);border-radius:24px;padding:24px;
+  box-shadow:0 15px 35px rgba(30,70,100,.16)
+}
+.welcome{display:grid;grid-template-columns:1fr minmax(230px,320px);gap:24px;align-items:center}
+.welcome h2{font-size:clamp(30px,5vw,54px);margin:0 0 8px;color:var(--navy)}
+.welcome .subtitle{font-size:22px;color:var(--orange);font-weight:800}
+.teacher-home{
+  width:100%;max-height:430px;object-fit:contain;border-radius:24px;
+  background:white;filter:drop-shadow(0 15px 20px rgba(0,0,0,.18))
+}
+.features{display:flex;flex-wrap:wrap;gap:9px;margin:16px 0}
+.pill{padding:8px 12px;border-radius:99px;background:var(--sky);font-weight:700}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:20px 0}
+.field label{font-weight:800;display:block;margin-bottom:6px}
+.field input,.field select{
+  width:100%;padding:13px;border:2px solid #cfe3f7;border-radius:13px;background:white
+}
+.primary,.secondary,.danger{
+  border:0;border-radius:15px;padding:14px 22px;font-weight:900;
+  box-shadow:0 6px 0 rgba(0,0,0,.14)
+}
+.primary{background:var(--gold);color:#4b3300}
+.secondary{background:#dceeff;color:var(--ink)}
+.danger{background:var(--red);color:white}
+.primary:active,.secondary:active,.danger:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.14)}
+.instructions{
+  background:#f7fbff;border-left:6px solid var(--blue);padding:14px 16px;
+  border-radius:12px;line-height:1.65
+}
+.exam-top{
+  display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;
+  margin-bottom:14px
+}
+.progress-wrap{height:14px;background:#dce8f2;border-radius:99px;overflow:hidden}
+.progress{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));width:0;transition:.3s}
+.counter,.timer{font-weight:900;background:var(--sky);padding:10px 13px;border-radius:12px}
+.question-card{
+  min-height:510px;border:3px solid #e2eef8;border-radius:22px;padding:22px;
+  background:linear-gradient(180deg,#fff,#f8fcff)
+}
+.category-tag{
+  display:inline-block;background:var(--navy);color:white;padding:7px 12px;
+  border-radius:99px;font-weight:800;margin-bottom:10px
+}
+.question-title{font-size:clamp(24px,4vw,36px);margin:8px 0 18px;text-align:center}
+.prompt-word{
+  font-size:clamp(34px,7vw,62px);font-weight:900;text-align:center;color:var(--blue);
+  margin:18px 0
+}
+.main-image{
+  display:block;width:min(350px,90%);height:230px;object-fit:contain;margin:8px auto 18px;
+  border-radius:20px;border:4px solid #dbeeff;background:white
+}
+.audio-area{text-align:center;margin:20px}
+.audio-btn{
+  border:0;background:var(--orange);color:white;border-radius:50%;
+  width:90px;height:90px;font-size:42px;box-shadow:0 8px 0 #c64200
+}
+.audio-btn:active{transform:translateY(4px);box-shadow:0 4px 0 #c64200}
+.options{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:850px;margin:auto
+}
+.option{
+  min-height:70px;border:3px solid #cfe3f7;background:white;border-radius:17px;
+  padding:13px;font-weight:800;font-size:20px;display:flex;align-items:center;
+  justify-content:center;text-align:center;transition:.15s
+}
+.option:hover{border-color:var(--blue);transform:translateY(-2px)}
+.option.selected{background:#dff1ff;border-color:var(--blue);box-shadow:0 0 0 3px rgba(36,116,198,.15)}
+.option img{width:100%;height:145px;object-fit:contain;border-radius:12px}
+.tf-options{grid-template-columns:repeat(2,minmax(140px,260px));justify-content:center}
+.nav-buttons{display:flex;justify-content:space-between;gap:12px;margin-top:18px}
+.review-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:18px 0}
+.review-btn{
+  border:2px solid #cfe3f7;border-radius:10px;background:white;padding:10px;font-weight:800
+}
+.review-btn.answered{background:#dff7e5;border-color:var(--green)}
+.review-btn.current{outline:4px solid rgba(255,183,3,.4)}
+.result-head{text-align:center}
+.result-score{font-size:70px;font-weight:900;color:var(--blue)}
+.result-message{font-size:28px;font-weight:900;color:var(--green)}
+.category-results{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0}
+.cat-result{background:var(--soft);border-radius:13px;padding:13px;display:flex;justify-content:space-between;font-weight:800}
+.status-box{padding:13px;border-radius:13px;margin:14px 0;font-weight:700}
+.status-ok{background:#dff7e5;color:#1f6b32}.status-warn{background:#fff2cc;color:#725300}
+.small{font-size:13px;opacity:.75}
+.hidden{display:none!important}
+@media(max-width:720px){
+  .app{padding:9px}.header{padding:14px}.teacher-mini span{display:none}
+  .welcome{grid-template-columns:1fr;text-align:center}.teacher-home{max-height:330px}
+  .form-grid{grid-template-columns:1fr}.exam-top{grid-template-columns:1fr 1fr}
+  .progress-wrap{grid-column:1/-1;grid-row:2}.options{grid-template-columns:1fr}
+  .question-card{padding:14px;min-height:520px}.review-grid{grid-template-columns:repeat(5,1fr)}
+  .category-results{grid-template-columns:1fr}.nav-buttons{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div>
+      <h1>Vocabulary Online Assessment</h1>
+      <p>Primary 3–6 • 10 Categories • 30 Questions</p>
+    </div>
+    <div class="teacher-mini">
+      <img src="assets/teacher_wongduen.png" alt="Teacher Wongduen">
+      <span>คุณครูวงเดือน ขุนอากร</span>
+    </div>
+  </header>
+
+  <section id="startScreen" class="screen active">
+    <div class="panel welcome">
+      <div>
+        <h2>Ready for the Test?</h2>
+        <div class="subtitle">แบบทดสอบคำศัพท์ภาษาอังกฤษออนไลน์</div>
+        <div class="features">
+          <span class="pill">Listening</span><span class="pill">Reading</span>
+          <span class="pill">Pictures</span><span class="pill">Sentences</span>
+          <span class="pill">30 Random Questions</span>
+        </div>
+        <div class="instructions">
+          <strong>Instructions:</strong><br>
+          1. Fill in your information.<br>
+          2. Listen and read carefully.<br>
+          3. Choose the best answer.<br>
+          4. You have 40 minutes.<br>
+          5. Check your answers before submitting.
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>First Name *</label><input id="firstName" autocomplete="given-name"></div>
+          <div class="field"><label>Last Name *</label><input id="lastName" autocomplete="family-name"></div>
+          <div class="field"><label>Class *</label>
+            <select id="grade"><option value="">Choose class</option><option>P.3</option><option>P.4</option><option>P.5</option><option>P.6</option></select>
+          </div>
+          <div class="field"><label>Number *</label><input id="studentNo" inputmode="numeric"></div>
+        </div>
+        <button class="primary" onclick="beginTest()">Start Test 🚀</button>
+      </div>
+      <div>
+        <img class="teacher-home" src="assets/teacher_wongduen.png" alt="Teacher Wongduen">
+        <p style="text-align:center;font-weight:900">Created by Wongduen</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="examScreen" class="screen">
+    <div class="panel">
+      <div class="exam-top">
+        <div class="progress-wrap"><div id="progress" class="progress"></div></div>
+        <div id="counter" class="counter">1 / 30</div>
+        <div id="timer" class="timer">40:00</div>
+      </div>
+      <div id="questionCard" class="question-card"></div>
+      <div class="nav-buttons">
+        <button id="prevBtn" class="secondary" onclick="goPrev()">← Previous</button>
+        <button class="secondary" onclick="openReview()">Review Answers</button>
+        <button id="nextBtn" class="primary" onclick="goNext()">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviewScreen" class="screen">
+    <div class="panel">
+      <h2>Review Your Answers</h2>
+      <p>Green numbers are answered. White numbers are unanswered.</p>
+      <div id="reviewGrid" class="review-grid"></div>
+      <p id="answerSummary" style="font-weight:900"></p>
+      <div class="nav-buttons">
+        <button class="secondary" onclick="showScreen('examScreen')">← Back to Test</button>
+        <button class="danger" onclick="submitTest()">Submit Test</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="resultScreen" class="screen">
+    <div class="panel">
+      <div class="result-head">
+        <h2>Test Completed!</h2>
+        <div id="resultScore" class="result-score">0/30</div>
+        <div id="resultPercent"></div>
+        <div id="resultMessage" class="result-message"></div>
+      </div>
+      <div id="sheetStatus" class="status-box status-warn">Saving result…</div>
+      <h3>Score by Category</h3>
+      <div id="categoryResults" class="category-results"></div>
+      <div class="nav-buttons">
+        <button class="secondary" onclick="downloadResultCSV()">Download Result</button>
+        <button class="primary" onclick="location.reload()">New Test</button>
+      </div>
+      <p class="small">The teacher can connect this test to Google Sheets by adding the Apps Script Web App URL in the code.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+const DATA = {"family": {"title": "Family", "icon": "👨‍👩‍👧‍👦", "words": ["father", "mother", "brother", "sister", "baby", "grandfather", "grandmother", "uncle", "aunt", "cousin"]}, "food": {"title": "Food", "icon": "🍽️", "words": ["rice", "noodles", "bread", "egg", "chicken", "fish", "salad", "soup", "milk", "water"]}, "animals": {"title": "Animals", "icon": "🐾", "words": ["cat", "dog", "bird", "fish", "elephant", "tiger", "lion", "monkey", "rabbit", "crocodile"]}, "school": {"title": "School", "icon": "🎒", "words": ["book", "pencil", "pen", "ruler", "eraser", "bag", "desk", "chair", "teacher", "student"]}, "places": {"title": "Places", "icon": "🏙️", "words": ["school", "hospital", "market", "park", "bank", "library", "restaurant", "police station", "bus station", "post office"]}, "home": {"title": "My Home", "icon": "🏠", "words": ["bedroom", "bathroom", "kitchen", "living room", "door", "window", "bed", "table", "chair", "television"]}, "occupation": {"title": "Occupation", "icon": "👷", "words": ["teacher", "doctor", "nurse", "police officer", "chef", "farmer", "pilot", "firefighter", "dentist", "singer"]}, "toys": {"title": "Toys", "icon": "🧸", "words": ["ball", "doll", "teddy bear", "kite", "toy car", "robot", "blocks", "puzzle", "yo-yo", "train"]}, "sport": {"title": "Sport", "icon": "🏅", "words": ["football", "basketball", "volleyball", "badminton", "tennis", "swimming", "running", "cycling", "boxing", "table tennis"]}, "fruits": {"title": "Fruits", "icon": "🍎", "words": ["apple", "banana", "orange", "mango", "watermelon", "grapes", "pineapple", "strawberry", "papaya", "coconut"]}};
+
+// Paste your deployed Google Apps Script Web App URL here.
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgjCP-W769DOt2lw4hjRDpli8Kis2C5hHbHJLS2L3TuWgL1FDbGZtR6b26Mg1FgkZczA/exec";
+
+const TOTAL_MINUTES = 40;
+const QUESTIONS_PER_CATEGORY = 3;
+let questions=[], answers=[], current=0, remaining=TOTAL_MINUTES*60, timerId=null;
+let resultPayload=null;
+
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"")}
+function imagePath(category,word,game=true){
+  return `${game?"game_assets":"assets"}/${category}_${slug(word)}.jpg`;
+}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function sample(a,n=1){return shuffle(a).slice(0,n)}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  scrollTo({top:0,behavior:"smooth"});
+}
+function speak(text){
+  if(!("speechSynthesis" in window)) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.78;u.pitch=1.03;
+  speechSynthesis.speak(u);
+}
+function distractors(category,correct,n=3){
+  return sample(DATA[category].words.filter(w=>w!==correct),n);
+}
+function imageOption(category,word){return {label:word,image:imagePath(category,word,true)}}
+
+function makeQuestion(category,word,type,index){
+  const cat=DATA[category];
+  const others=distractors(category,word,3);
+  const q={id:`${category}-${index}-${word}`,category,categoryTitle:cat.title,word,type,answer:word};
+  if(type==="imageToWord"){
+    q.title="Look at the picture. Choose the correct word.";
+    q.image=imagePath(category,word,true);q.options=shuffle([word,...others]);
+  }else if(type==="wordToImage"){
+    q.title="Read the word. Choose the correct picture.";
+    q.prompt=word;q.options=shuffle([word,...others]).map(w=>imageOption(category,w));
+  }else if(type==="audioToImage"){
+    q.title="Listen. Choose the correct picture.";
+    q.audio=word;q.options=shuffle([word,...others]).map(w=>imageOption(category,w));
+  }else if(type==="trueFalse"){
+    const isTrue=Math.random()>.5;
+    const shown=isTrue?word:sample(DATA[category].words.filter(w=>w!==word))[0];
+    q.title="Look at the picture. Is the sentence true or false?";
+    q.image=imagePath(category,word,true);
+    q.statement=`This is ${/^[aeiou]/i.test(shown)?"an":"a"} ${shown}.`;
+    q.answer=isTrue?"True":"False";q.options=["True","False"];
+  }else if(type==="sentence"){
+    q.title="Choose the correct sentence.";
+    q.image=imagePath(category,word,true);
+    const sentences=shuffle([word,...others]).map(w=>`This is ${/^[aeiou]/i.test(w)?"an":"a"} ${w}.`);
+    q.answer=`This is ${/^[aeiou]/i.test(word)?"an":"a"} ${word}.`;q.options=sentences;
+  }else if(type==="missing"){
+    q.title="Complete the word.";
+    q.image=imagePath(category,word,true);
+    const hidden=word.replace(/[aeiou]/i,"_");
+    q.prompt=hidden;q.options=shuffle([word,...others]);
+  }else if(type==="odd"){
+    q.title="Choose the word that is different.";
+    const otherCats=Object.keys(DATA).filter(c=>c!==category);
+    const oddCat=sample(otherCats)[0];
+    const same=sample(DATA[category].words,3);
+    const oddWord=sample(DATA[oddCat].words)[0];
+    q.answer=oddWord;q.options=shuffle([...same,oddWord]);
+  }
+  return q;
+}
+
+function buildQuestions(grade){
+  const lower=["imageToWord","wordToImage","audioToImage","trueFalse","sentence"];
+  const upper=["imageToWord","wordToImage","audioToImage","trueFalse","sentence","missing","odd"];
+  const types=(grade==="P.3"||grade==="P.4")?lower:upper;
+  let all=[];
+  Object.keys(DATA).forEach(category=>{
+    const chosen=sample(DATA[category].words,QUESTIONS_PER_CATEGORY);
+    chosen.forEach((word,i)=>{
+      let type=types[(i+Math.floor(Math.random()*types.length))%types.length];
+      // Guarantee variety per category.
+      if(i===0) type="audioToImage";
+      if(i===1) type=(grade==="P.3"?"imageToWord":"wordToImage");
+      if(i===2) type=(grade==="P.5"||grade==="P.6")?(Math.random()>.5?"missing":"sentence"):"trueFalse";
+      all.push(makeQuestion(category,word,type,i));
+    });
+  });
+  return shuffle(all);
+}
+
+function beginTest(){
+  const fn=document.getElementById("firstName").value.trim();
+  const ln=document.getElementById("lastName").value.trim();
+  const grade=document.getElementById("grade").value;
+  const no=document.getElementById("studentNo").value.trim();
+  if(!fn||!ln||!grade||!no){alert("Please complete all student information.");return}
+  questions=buildQuestions(grade);answers=Array(questions.length).fill(null);current=0;
+  localStorage.setItem("vocabStudent",JSON.stringify({fn,ln,grade,no}));
+  showScreen("examScreen");renderQuestion();startTimer();
+}
+function startTimer(){
+  clearInterval(timerId);updateTimer();
+  timerId=setInterval(()=>{remaining--;updateTimer();if(remaining<=0){clearInterval(timerId);submitTest(true)}},1000)
+}
+function updateTimer(){
+  const m=Math.floor(remaining/60),s=remaining%60;
+  document.getElementById("timer").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  if(remaining<=300) document.getElementById("timer").style.color="var(--red)";
+}
+function renderQuestion(){
+  const q=questions[current],card=document.getElementById("questionCard");
+  document.getElementById("counter").textContent=`${current+1} / ${questions.length}`;
+  document.getElementById("progress").style.width=`${((current+1)/questions.length)*100}%`;
+  document.getElementById("prevBtn").disabled=current===0;
+  document.getElementById("nextBtn").textContent=current===questions.length-1?"Review →":"Next →";
+  let body=`<div class="category-tag">${DATA[q.category].icon} ${q.categoryTitle}</div>
+    <h2 class="question-title">${q.title}</h2>`;
+  if(q.image) body+=`<img class="main-image" src="${q.image}" alt="">`;
+  if(q.audio) body+=`<div class="audio-area"><button class="audio-btn" onclick="speak('${q.audio.replace(/'/g,"\\'")}')">🔊</button><p>Tap to listen</p></div>`;
+  if(q.prompt) body+=`<div class="prompt-word">${q.prompt}</div>`;
+  if(q.statement) body+=`<div class="prompt-word" style="font-size:30px">${q.statement}</div>`;
+  const tf=q.options.length===2?" tf-options":"";
+  body+=`<div class="options${tf}">`;
+  q.options.forEach((opt,i)=>{
+    const val=typeof opt==="string"?opt:opt.label;
+    const selected=answers[current]===val?" selected":"";
+    if(typeof opt==="string"){
+      body+=`<button class="option${selected}" onclick="selectAnswer(${i})">${opt}</button>`;
+    }else{
+      body+=`<button class="option${selected}" onclick="selectAnswer(${i})"><img src="${opt.image}" alt=""></button>`;
+    }
+  });
+  body+="</div>";card.innerHTML=body;
+}
+function selectAnswer(i){
+  const opt=questions[current].options[i];
+  answers[current]=typeof opt==="string"?opt:opt.label;renderQuestion();
+}
+function goPrev(){if(current>0){current--;renderQuestion()}}
+function goNext(){if(current<questions.length-1){current++;renderQuestion()}else openReview()}
+function openReview(){
+  const grid=document.getElementById("reviewGrid");grid.innerHTML="";
+  answers.forEach((a,i)=>{
+    const b=document.createElement("button");
+    b.className=`review-btn ${a!==null?"answered":""} ${i===current?"current":""}`;
+    b.textContent=i+1;b.onclick=()=>{current=i;showScreen("examScreen");renderQuestion()};grid.appendChild(b);
+  });
+  const answered=answers.filter(a=>a!==null).length;
+  document.getElementById("answerSummary").textContent=`Answered: ${answered}/${questions.length} • Unanswered: ${questions.length-answered}`;
+  showScreen("reviewScreen");
+}
+function submitTest(auto=false){
+  const unanswered=answers.filter(a=>a===null).length;
+  if(!auto&&unanswered&&!confirm(`You still have ${unanswered} unanswered question(s). Submit now?`))return;
+  if(!auto&&!confirm("Submit your test now? You cannot change your answers after submission."))return;
+  clearInterval(timerId);
+  calculateResult();
+}
+function calculateResult(){
+  const student=JSON.parse(localStorage.getItem("vocabStudent")||"{}");
+  let score=0;const categoryScores={};
+  Object.keys(DATA).forEach(c=>categoryScores[c]={correct:0,total:0});
+  questions.forEach((q,i)=>{
+    categoryScores[q.category].total++;
+    if(answers[i]===q.answer){score++;categoryScores[q.category].correct++}
+  });
+  const percent=Math.round(score/questions.length*100);
+  const message=percent>=90?"Excellent!":percent>=80?"Very Good!":percent>=70?"Good Job!":percent>=60?"Good Effort!":"Keep Practising!";
+  resultPayload={
+    timestamp:new Date().toISOString(),firstName:student.fn,lastName:student.ln,
+    grade:student.grade,studentNo:student.no,score,total:questions.length,percent,
+    timeUsedSeconds:TOTAL_MINUTES*60-remaining,categoryScores,
+    answers:questions.map((q,i)=>({category:q.category,type:q.type,word:q.word,selected:answers[i]||"",correct:q.answer,isCorrect:answers[i]===q.answer}))
+  };
+  document.getElementById("resultScore").textContent=`${score}/${questions.length}`;
+  document.getElementById("resultPercent").textContent=`${percent}%`;
+  document.getElementById("resultMessage").textContent=message;
+  const box=document.getElementById("categoryResults");box.innerHTML="";
+  Object.entries(categoryScores).forEach(([c,v])=>{
+    box.innerHTML+=`<div class="cat-result"><span>${DATA[c].icon} ${DATA[c].title}</span><span>${v.correct}/${v.total}</span></div>`;
+  });
+  showScreen("resultScreen");saveToGoogleSheets(resultPayload);
+}
+async function saveToGoogleSheets(payload){
+  const status=document.getElementById("sheetStatus");
+  if(!GOOGLE_SCRIPT_URL){
+    status.className="status-box status-warn";
+    status.textContent="Result is shown on this device. Google Sheets is not connected yet.";
+    return;
+  }
+  try{
+    const body=new URLSearchParams();body.set("payload",JSON.stringify(payload));
+    await fetch(GOOGLE_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded"},body});
+    status.className="status-box status-ok";
+    status.textContent="Result sent to Google Sheets successfully.";
+  }catch(e){
+    status.className="status-box status-warn";
+    status.textContent="Could not send to Google Sheets. Download the result as a backup.";
+  }
+}
+function downloadResultCSV(){
+  if(!resultPayload)return;
+  const rows=[
+    ["Timestamp","First Name","Last Name","Class","Number","Score","Total","Percent","Time Used (seconds)"],
+    [resultPayload.timestamp,resultPayload.firstName,resultPayload.lastName,resultPayload.grade,resultPayload.studentNo,resultPayload.score,resultPayload.total,resultPayload.percent,resultPayload.timeUsedSeconds]
+  ];
+  Object.entries(resultPayload.categoryScores).forEach(([c,v])=>rows.push([DATA[c].title,v.correct,v.total]));
+  const csv=rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`Vocabulary_Test_${resultPayload.grade}_${resultPayload.studentNo}.csv`;a.click();
+}
+</script>
+</body>
+</html>
